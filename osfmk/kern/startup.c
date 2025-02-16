@@ -275,12 +275,12 @@ kernel_startup_bootstrap(void)
 	size_t n = startup_entries_end - startup_entries;
 
 	if (n == 0) {
-		panic("Section %s,%s missing",
+		panic("xnubw_panic: Section %s,%s is missing!",
 		    STARTUP_HOOK_SEGMENT, STARTUP_HOOK_SECTION);
 	}
 	if (((uintptr_t)startup_entries_end - (uintptr_t)startup_entries) %
 	    sizeof(struct startup_entry)) {
-		panic("Section %s,%s has invalid size",
+		panic("xnubw_panic: Section %s,%s has invalid size!",
 		    STARTUP_HOOK_SEGMENT, STARTUP_HOOK_SECTION);
 	}
 
@@ -379,7 +379,7 @@ kernel_bootstrap(void)
 
 	scale_setup();
 
-	kernel_bootstrap_log("vm_mem_bootstrap");
+	kernel_bootstrap_log("xnubw: vm_mem_bootstrap");
 	vm_mem_bootstrap();
 
 	machine_info.memory_size = (uint32_t)mem_size;
@@ -394,12 +394,12 @@ kernel_bootstrap(void)
 	kernel_startup_initialize_upto(STARTUP_SUB_OSLOG);
 
 #if KASAN
-	kernel_bootstrap_log("kasan_late_init");
+	kernel_bootstrap_log("xnubw: kasan_late_init");
 	kasan_late_init();
 #endif
 
 #if CONFIG_TELEMETRY
-	kernel_bootstrap_log("telemetry_init");
+	kernel_bootstrap_log("xnubw: telemetry_init");
 	telemetry_init();
 #endif
 
@@ -413,20 +413,20 @@ kernel_bootstrap(void)
 		}
 	}
 
-	kernel_bootstrap_log("console_init");
+	kernel_bootstrap_log("xnubw: console_init");
 	console_init();
 
-	kernel_bootstrap_log("stackshot_init");
+	kernel_bootstrap_log("xnubw: stackshot_init");
 	stackshot_init();
 
-	kernel_bootstrap_log("sched_init");
+	kernel_bootstrap_log("xnubw: sched_init");
 	sched_init();
 
-	kernel_bootstrap_log("waitq_bootstrap");
+	kernel_bootstrap_log("xnubw: waitq_bootstrap");
 	waitq_bootstrap();
 
 #if CONFIG_MACF
-	kernel_bootstrap_log("mac_policy_init");
+	kernel_bootstrap_log("xnubw: mac_policy_init");
 	mac_policy_init();
 #endif
 
@@ -436,62 +436,62 @@ kernel_bootstrap(void)
 	 * As soon as the virtual memory system is up, we record
 	 * that this CPU is using the kernel pmap.
 	 */
-	kernel_bootstrap_log("PMAP_ACTIVATE_KERNEL");
+	kernel_bootstrap_log("xnubw_bootstrap: PMAP_ACTIVATE_KERNEL");
 	PMAP_ACTIVATE_KERNEL(master_cpu);
 
-	kernel_bootstrap_log("mapping_free_prime");
+	kernel_bootstrap_log("xnubw_bootstrap: mapping_free_prime");
 	mapping_free_prime();                                           /* Load up with temporary mapping blocks */
 
-	kernel_bootstrap_log("machine_init");
+	kernel_bootstrap_log("xnubw_bootstrap: machine_init");
 	machine_init();
 
-	kernel_bootstrap_log("thread_machine_init_template");
+	kernel_bootstrap_log("xnubw_bootstrap: thread_machine_init_template");
 	thread_machine_init_template();
 
-	kernel_bootstrap_log("clock_init");
+	kernel_bootstrap_log("xnubw_bootstrap: clock_init");
 	clock_init();
 
 	/*
 	 *	Initialize the IPC, task, and thread subsystems.
 	 */
 #if CONFIG_THREAD_GROUPS
-	kernel_bootstrap_log("thread_group_init");
+	kernel_bootstrap_log("xnubw_bootstrap: thread_group_init");
 	thread_group_init();
 #endif
 
 #if CONFIG_COALITIONS
-	kernel_bootstrap_log("coalitions_init");
+	kernel_bootstrap_log("xnubw_bootstrap: coalitions_init");
 	coalitions_init();
 #endif
 
-	kernel_bootstrap_log("task_init");
+	kernel_bootstrap_log("xnubw_bootstrap: task_init");
 	task_init();
 
-	kernel_bootstrap_log("thread_init");
+	kernel_bootstrap_log("xnubw_bootstrap: thread_init");
 	thread_init();
 
-	kernel_bootstrap_log("restartable_init");
+	kernel_bootstrap_log("xnubw_bootstrap: restartable_init");
 	restartable_init();
 
-	kernel_bootstrap_log("workq_init");
+	kernel_bootstrap_log("xnubw_bootstrap: workq_init");
 	workq_init();
 
-	kernel_bootstrap_log("turnstiles_init");
+	kernel_bootstrap_log("xnubw_bootstrap: turnstiles_init");
 	turnstiles_init();
 
 #if CONFIG_ATM
 	/* Initialize the Activity Trace Resource Manager. */
-	kernel_bootstrap_log("atm_init");
+	kernel_bootstrap_log("xnubw_bootstrap: atm_init");
 	atm_init();
 #endif
-	kernel_bootstrap_log("mach_init_activity_id");
+	kernel_bootstrap_log("xnubw_bootstrap: mach_init_activity_id");
 	mach_init_activity_id();
 
 	/* Initialize the BANK Manager. */
-	kernel_bootstrap_log("bank_init");
+	kernel_bootstrap_log("xnubw_bootstrap: bank_init");
 	bank_init();
 
-	kernel_bootstrap_log("ipc_pthread_priority_init");
+	kernel_bootstrap_log("xnubw_bootstrap: ipc_pthread_priority_init");
 	ipc_pthread_priority_init();
 
 	/* initialize the corpse config based on boot-args */
@@ -501,11 +501,11 @@ kernel_bootstrap(void)
 	host_statistics_init();
 
 	/* initialize exceptions */
-	kernel_bootstrap_log("exception_init");
+	kernel_bootstrap_log("xnubw_bootstrap: exception_init");
 	exception_init();
 
 #if CONFIG_SCHED_SFI
-	kernel_bootstrap_log("sfi_init");
+	kernel_bootstrap_log("xnubw_bootstrap: sfi_init");
 	sfi_init();
 #endif
 
@@ -513,11 +513,11 @@ kernel_bootstrap(void)
 	 *	Create a kernel thread to execute the kernel bootstrap.
 	 */
 
-	kernel_bootstrap_log("kernel_thread_create");
+	kernel_bootstrap_log("xnubw_bootstrap: kernel_thread_create");
 	result = kernel_thread_create((thread_continue_t)kernel_bootstrap_thread, NULL, MAXPRI_KERNEL, &thread);
 
 	if (result != KERN_SUCCESS) {
-		panic("kernel_bootstrap: result = %08X\n", result);
+		panic("xnubw_kernel_bootstrap: result = %08X\n", result);
 	}
 
 	/* The static init_thread is re-used as the bootstrap thread */
@@ -550,7 +550,7 @@ kernel_bootstrap_thread(void)
 {
 	processor_t             processor = current_processor();
 
-	kernel_bootstrap_thread_log("idle_thread_create");
+	kernel_bootstrap_thread_log("xnubw_bootstrap_thread: idle_thread_create");
 	/*
 	 * Create the idle processor thread.
 	 */
@@ -562,13 +562,13 @@ kernel_bootstrap_thread(void)
 	 *
 	 * Start up the scheduler services.
 	 */
-	kernel_bootstrap_thread_log("sched_startup");
+	kernel_bootstrap_thread_log("xnubw_bootstrap_thread: sched_startup");
 	sched_startup();
 
 	/*
 	 * Thread lifecycle maintenance (teardown, stack allocation)
 	 */
-	kernel_bootstrap_thread_log("thread_daemon_init");
+	kernel_bootstrap_thread_log("xnubw_bootstrap_thread: thread_daemon_init");
 	thread_daemon_init();
 
 	/* Create kernel map entry reserve */
@@ -577,39 +577,39 @@ kernel_bootstrap_thread(void)
 	/*
 	 * Thread callout service.
 	 */
-	kernel_bootstrap_thread_log("thread_call_initialize");
+	kernel_bootstrap_thread_log("xnubw_bootstrap_thread: thread_call_initialize");
 	thread_call_initialize();
 
 	/*
 	 * Work interval subsystem initialization.
 	 * Needs to be done once thread calls have been initialized.
 	 */
-	kernel_bootstrap_thread_log("work_interval_initialize");
+	kernel_bootstrap_thread_log("xnubw_bootstrap_thread: work_interval_initialize");
 	work_interval_subsystem_init();
 
 	/*
 	 * Remain on current processor as
 	 * additional processors come online.
 	 */
-	kernel_bootstrap_thread_log("thread_bind");
+	kernel_bootstrap_thread_log("xnubw_bootstrap_thread: thread_bind");
 	thread_bind(processor);
 
 	/*
 	 * Initialize ipc thread call support.
 	 */
-	kernel_bootstrap_thread_log("ipc_thread_call_init");
+	kernel_bootstrap_thread_log("xnubw_bootstrap_thread: ipc_thread_call_init");
 	ipc_thread_call_init();
 
 	/*
 	 * Kick off memory mapping adjustments.
 	 */
-	kernel_bootstrap_thread_log("mapping_adjust");
+	kernel_bootstrap_thread_log("xnubw_bootstrap_thread: mapping_adjust");
 	mapping_adjust();
 
 	/*
 	 *	Create the clock service.
 	 */
-	kernel_bootstrap_thread_log("clock_service_create");
+	kernel_bootstrap_thread_log("xnubw_bootstrap_thread: clock_service_create");
 	clock_service_create();
 
 	/*
@@ -620,7 +620,7 @@ kernel_bootstrap_thread(void)
 	phys_carveout_init();
 
 #if MACH_KDP
-	kernel_bootstrap_log("kdp_init");
+	kernel_bootstrap_log("xnubw_bootstrap_thread: kdp_init");
 	kdp_init();
 #endif
 
@@ -633,17 +633,17 @@ kernel_bootstrap_thread(void)
 #endif
 
 #if HYPERVISOR
-	kernel_bootstrap_thread_log("hv_support_init");
+	kernel_bootstrap_thread_log("xnubw_bootstrap_thread: hv_support_init");
 	hv_support_init();
 #endif
 
 #if CONFIG_TELEMETRY
-	kernel_bootstrap_log("bootprofile_init");
+	kernel_bootstrap_log("xnubw_bootstrap_thread: bootprofile_init");
 	bootprofile_init();
 #endif
 
 	char trace_typefilter[256] = {};
-	PE_parse_boot_arg_str("trace_typefilter", trace_typefilter,
+	PE_parse_boot_arg_str("xnubw_bootstrap_thread: trace_typefilter", trace_typefilter,
 	    sizeof(trace_typefilter));
 #if KPERF
 	kperf_init();
@@ -654,7 +654,7 @@ kernel_bootstrap_thread(void)
 	kernel_startup_initialize_upto(STARTUP_SUB_SYSCTL);
 
 #ifdef  IOKIT
-	kernel_bootstrap_log("PE_init_iokit");
+	kernel_bootstrap_log("xnubw_bootstrap_thread: PE_init_iokit");
 	PE_init_iokit();
 #endif
 
@@ -684,22 +684,22 @@ kernel_bootstrap_thread(void)
 	vm_commpage_text_init();
 
 #if CONFIG_MACF
-	kernel_bootstrap_log("mac_policy_initmach");
+	kernel_bootstrap_log("xnubw_bootstrap: mac_policy_initmach");
 	mac_policy_initmach();
 #if CONFIG_VNGUARD
-	kernel_bootstrap_log("vnguard_policy_init");
+	kernel_bootstrap_log("xnubw_bootstrap: vnguard_policy_init");
 	vnguard_policy_init();
 #endif
 #endif
 
 #if CONFIG_DTRACE
-	kernel_bootstrap_log("dtrace_early_init");
+	kernel_bootstrap_log("xnubw_bootstrap: dtrace_early_init");
 	dtrace_early_init();
 	sdt_early_init();
 #endif
 
 #ifndef BCM2837
-	kernel_bootstrap_log("trust_cache_init");
+	kernel_bootstrap_log("xnubw_bootstrap: trust_cache_init");
 	trust_cache_init();
 #endif
 
@@ -711,7 +711,7 @@ kernel_bootstrap_thread(void)
 	 * Must be done prior to lockdown so that we can free (and possibly relocate)
 	 * the static KVA mappings used for the jettisoned bootstrap segments.
 	 */
-	kernel_bootstrap_log("OSKextRemoveKextBootstrap");
+	kernel_bootstrap_log("xnubw_bootstrap: OSKextRemoveKextBootstrap");
 	OSKextRemoveKextBootstrap();
 
 	/*
@@ -733,11 +733,11 @@ kernel_bootstrap_thread(void)
 	read_random(&vm_kernel_addrhash_salt_ext, sizeof(vm_kernel_addrhash_salt_ext));
 
 	/* No changes to kernel text and rodata beyond this point. */
-	kernel_bootstrap_log("machine_lockdown");
+	kernel_bootstrap_log("xnubw_bootstrap: machine_lockdown");
 	machine_lockdown();
 
 #ifdef  IOKIT
-	kernel_bootstrap_log("PE_lockdown_iokit");
+	kernel_bootstrap_log("xnubw_bootstrap: PE_lockdown_iokit");
 	PE_lockdown_iokit();
 #endif
 	/*
@@ -750,9 +750,9 @@ kernel_bootstrap_thread(void)
 	kern_return_t result = kernel_list_tests();
 	result = kernel_do_post();
 	if (result != KERN_SUCCESS) {
-		panic("kernel_do_post: Tests failed with result = 0x%08x\n", result);
+		panic("xnubw: kernel_do_post: Tests failed with result = 0x%08x\n", result);
 	}
-	kernel_bootstrap_log("kernel_do_post - done");
+	kernel_bootstrap_log("xnubw: kernel_do_post - done");
 #endif /* CONFIG_XNUPOST */
 
 
@@ -873,10 +873,10 @@ load_context(
 
 #define load_context_kprintf(x...) /* kprintf("load_context: " x) */
 
-	load_context_kprintf("machine_set_current_thread\n");
+	load_context_kprintf("xnubw_load_con_kprintf: machine_set_current_thread\n");
 	machine_set_current_thread(thread);
 
-	load_context_kprintf("processor_up\n");
+	load_context_kprintf("xnubw_load_con_kprintf: processor_up\n");
 
 	PMAP_ACTIVATE_KERNEL(processor->cpu_id);
 
@@ -885,12 +885,12 @@ load_context(
 	 * should never occur since the thread is expected
 	 * to have reserved stack.
 	 */
-	load_context_kprintf("thread %p, stack %lx, stackptr %lx\n", thread,
+	load_context_kprintf("xnubw_load_con_kprintf: thread %p, stack %lx, stackptr %lx\n", thread,
 	    thread->kernel_stack, thread->machine.kstackptr);
 	if (!thread->kernel_stack) {
-		load_context_kprintf("stack_alloc_try\n");
+		load_context_kprintf("xnubw_load_con_kprintf: stack_alloc_try\n");
 		if (!stack_alloc_try(thread)) {
-			panic("load_context");
+			panic("xnubw ERR! PANIC!: load_context");
 		}
 	}
 
@@ -933,7 +933,7 @@ load_context(
 
 	PMAP_ACTIVATE_USER(thread, processor->cpu_id);
 
-	load_context_kprintf("machine_load_context\n");
+	load_context_kprintf("xnubw_load_con_kprintf: machine_load_context\n");
 
 	machine_load_context(thread);
 	/*NOTREACHED*/
