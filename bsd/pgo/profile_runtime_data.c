@@ -1,3 +1,6 @@
+#ifndef PROFILE_RUNTIME_DATA_H
+#define PROFILE_RUNTIME_DATA_H
+
 #include <mach/vm_param.h>
 
 /*
@@ -6,14 +9,13 @@
  */
 int __llvm_profile_runtime = 0;
 
-/* compiler-rt requires this.  It uses it to page-align
+/*
+ * compiler-rt requires this. It uses it to page-align
  * certain things inside its buffers.
  */
-
-extern int getpagesize(void);
-
-int
-getpagesize()
+int getpagesize(void)
 {
 	return PAGE_SIZE;
 }
+
+#endif 
